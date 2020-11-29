@@ -3,7 +3,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class Main2 implements Runnable{
+public class Main2 extends Thread{
+
 
     public static Map<String, String> map = new HashMap<>();
     public static ArrayList<String> day = new ArrayList<>();
@@ -28,32 +29,38 @@ public class Main2 implements Runnable{
 
     public synchronized void getDay() throws InterruptedException{
         Random random = new Random();
-        if(english == null){
-            english = day.get(random.nextInt(day.size()));
-            System.out.print(english + " ");
-        }else{
-            String vietnamese = map.get(english);
-            System.out.print(vietnamese);
-            english = null;
-            System.out.println();
+        if(this.getName() == "english") {
+            if (english == null) {
+                english = day.get(random.nextInt(day.size()));
+                System.out.println(english + " ");
+                Thread.sleep(1000);
+            }
         }
-        Thread.sleep(1000);
+        if(this.getName() == "vietnamese"){
+            if(english != null) {
+                String vietnamese = map.get(english);
+                System.out.println(vietnamese);
+                english = null;
+            }
+        }
     }
 
     public void run(){
-        try{
-            getDay();
-        }catch (InterruptedException e){
-            e.printStackTrace();
+        while(true){
+            try{
+                getDay();
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
         }
     }
 
     public static void main(String[] args){
-        Main2 thread1 = new Main2();
-        Main2 thread2 = new Main2();
-        while(true){
-            thread1.run();
-            thread2.run();
-        }
+        Thread thread1 = new Main2();
+        thread1.setName("english");
+        Thread thread2 = new Main2();
+        thread2.setName("vietnamese");
+        thread1.start();
+        thread2.start();
     }
 }
